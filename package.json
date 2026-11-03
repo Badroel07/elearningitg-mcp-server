@@ -1,0 +1,39 @@
+{
+  "name": "elearningitg-mcp-server",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) Server for ITG E-Learning (elearning.itg.ac.id)",
+  "main": "dist/index.js",
+  "bin": {
+    "elearningitg-mcp-server": "./dist/index.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Badroel07/elearningitg-mcp-server.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "itg",
+    "elearning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "axios": "^1.8.1",
+    "dotenv": "^16.4.7",
+    "form-data": "^4.0.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
