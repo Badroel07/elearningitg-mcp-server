@@ -1,3 +1,5 @@
+[![M8ven Verified](https://m8ven.ai/badge/mcp/badroel07/elearningitg-mcp-server?variant=verified)](https://m8ven.ai/mcp/badroel07/elearningitg-mcp-server?s=readme)
+
 # E-Learning ITG MCP Server
 
 Model Context Protocol (MCP) Server untuk berinteraksi dengan portal akademik E-Learning Institut Teknologi Garut (https://elearning.itg.ac.id/).
