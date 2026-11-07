@@ -30,144 +30,200 @@ const server = new Server(
   }
 );
 
+export const TOOLS = [
+  {
+    name: "elearning_login",
+    description:
+      "Melakukan autentikasi ke elearning.itg.ac.id menggunakan NIM/Username dan Password. Token sesi disimpan otomatis di memori klien.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        username: {
+          type: "string",
+          description: "NIM atau username akun E-Learning (opsional jika sudah diatur di .env)",
+        },
+        password: {
+          type: "string",
+          description: "Kata sandi akun E-Learning (opsional jika sudah diatur di .env)",
+        },
+      },
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_get_dashboard",
+    description:
+      "Mengambil ringkasan indikator dashboard E-Learning ITG (jumlah tugas aktif yang belum dikerjakan, evaluasi, materi daring, dan pengumuman).",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_list_tugas",
+    description:
+      "Mengambil daftar tugas kuliah mahasiswa beserta informasi tenggat waktu (deadline), mata kuliah, dosen, dan status pengerjaan.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        mapel_id: {
+          type: "number",
+          description: "Filter opsional berdasarkan ID mata kuliah tertentu",
+        },
+      },
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_get_tugas_detail",
+    description:
+      "Mengambil rincian instruksi tugas, berkas lampiran dosen, dan memeriksa apakah tugas tersebut mengunci pengunggahan dengan syarat otorisasi foto wajah (status 2).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tugas_id: {
+          type: "number",
+          description: "ID tugas yang ingin dilihat rinciannya",
+        },
+      },
+      required: ["tugas_id"],
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_submit_tugas",
+    description:
+      "Mengunggah berkas jawaban tugas mahasiswa ke sistem, melakukan bypass frame hitam otomatis jika tugas meminta otorisasi foto webcam, dan menyelesaikan pengumpulan.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tugas_id: {
+          type: "number",
+          description: "ID tugas mahasiswa (item.id atau tugas_id) yang akan dikumpulkan",
+        },
+        file_path: {
+          type: "string",
+          description: "Path absolut atau relatif ke file lokal yang hendak diunggah (misal .pdf, .docx, .zip)",
+        },
+        bypass_photo: {
+          type: "boolean",
+          description:
+            "Jika true (default), otomatis mengirim frame citra JPEG hitam valid ke endpoint foto_siswa bila tugas berada pada status 2 (kamera wajib).",
+          default: true,
+        },
+      },
+      required: ["tugas_id", "file_path"],
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_submit_tugas_link",
+    description:
+      "Mengunggah tautan jawaban tugas mahasiswa (seperti link Google Drive, GitHub, YouTube, dsb.) langsung ke tugas dan otomatis menyelesaikan status pengumpulan.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tugas_id: {
+          type: "number",
+          description: "ID tugas mahasiswa (item.id dari list tugas, misal 454692) yang akan dikumpulkan",
+        },
+        link: {
+          type: "string",
+          description: "URL tautan jawaban tugas (misal https://drive.google.com/...)",
+        },
+      },
+      required: ["tugas_id", "link"],
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_get_jadwal",
+    description: "Mengambil jadwal perkuliahan mingguan mahasiswa lengkap dengan jam, ruangan, dan dosen pengampu.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_get_materi",
+    description: "Mengambil daftar materi perkuliahan yang diunggah dosen beserta tautan unduhan berkas.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        mapel_id: {
+          type: "number",
+          description: "Filter opsional berdasarkan ID mata kuliah",
+        },
+      },
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: "elearning_get_khs",
+    description: "Mengambil Kartu Hasil Studi (KHS), daftar nilai, dan perolehan SKS mahasiswa per semester.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        semester: {
+          type: "string",
+          description: "Nomor atau identifikasi semester (contoh: '1', '2', 'Ganjil', 'Genap')",
+        },
+      },
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+];
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [
-      {
-        name: "elearning_login",
-        description:
-          "Melakukan autentikasi ke elearning.itg.ac.id menggunakan NIM/Username dan Password. Token sesi disimpan otomatis di memori klien.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            username: {
-              type: "string",
-              description: "NIM atau username akun E-Learning (opsional jika sudah diatur di .env)",
-            },
-            password: {
-              type: "string",
-              description: "Kata sandi akun E-Learning (opsional jika sudah diatur di .env)",
-            },
-          },
-        },
-      },
-      {
-        name: "elearning_get_dashboard",
-        description:
-          "Mengambil ringkasan indikator dashboard E-Learning ITG (jumlah tugas aktif yang belum dikerjakan, evaluasi, materi daring, dan pengumuman).",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-      {
-        name: "elearning_list_tugas",
-        description:
-          "Mengambil daftar tugas kuliah mahasiswa beserta informasi tenggat waktu (deadline), mata kuliah, dosen, dan status pengerjaan.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            mapel_id: {
-              type: "number",
-              description: "Filter opsional berdasarkan ID mata kuliah tertentu",
-            },
-          },
-        },
-      },
-      {
-        name: "elearning_get_tugas_detail",
-        description:
-          "Mengambil rincian instruksi tugas, berkas lampiran dosen, dan memeriksa apakah tugas tersebut mengunci pengunggahan dengan syarat otorisasi foto wajah (status 2).",
-        inputSchema: {
-          type: "object",
-          properties: {
-            tugas_id: {
-              type: "number",
-              description: "ID tugas yang ingin dilihat rinciannya",
-            },
-          },
-          required: ["tugas_id"],
-        },
-      },
-      {
-        name: "elearning_submit_tugas",
-        description:
-          "Mengunggah berkas jawaban tugas mahasiswa ke sistem, melakukan bypass frame hitam otomatis jika tugas meminta otorisasi foto webcam, dan menyelesaikan pengumpulan.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            tugas_id: {
-              type: "number",
-              description: "ID tugas mahasiswa (item.id atau tugas_id) yang akan dikumpulkan",
-            },
-            file_path: {
-              type: "string",
-              description: "Path absolut atau relatif ke file lokal yang hendak diunggah (misal .pdf, .docx, .zip)",
-            },
-            bypass_photo: {
-              type: "boolean",
-              description:
-                "Jika true (default), otomatis mengirim frame citra JPEG hitam valid ke endpoint foto_siswa bila tugas berada pada status 2 (kamera wajib).",
-              default: true,
-            },
-          },
-          required: ["tugas_id", "file_path"],
-        },
-      },
-      {
-        name: "elearning_submit_tugas_link",
-        description:
-          "Mengunggah tautan jawaban tugas mahasiswa (seperti link Google Drive, GitHub, YouTube, dsb.) langsung ke tugas dan otomatis menyelesaikan status pengumpulan.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            tugas_id: {
-              type: "number",
-              description: "ID tugas mahasiswa (item.id dari list tugas, misal 454692) yang akan dikumpulkan",
-            },
-            link: {
-              type: "string",
-              description: "URL tautan jawaban tugas (misal https://drive.google.com/...)",
-            },
-          },
-          required: ["tugas_id", "link"],
-        },
-      },
-      {
-        name: "elearning_get_jadwal",
-        description: "Mengambil jadwal perkuliahan mingguan mahasiswa lengkap dengan jam, ruangan, dan dosen pengampu.",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-      {
-        name: "elearning_get_materi",
-        description: "Mengambil daftar materi perkuliahan yang diunggah dosen beserta tautan unduhan berkas.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            mapel_id: {
-              type: "number",
-              description: "Filter opsional berdasarkan ID mata kuliah",
-            },
-          },
-        },
-      },
-      {
-        name: "elearning_get_khs",
-        description: "Mengambil Kartu Hasil Studi (KHS), daftar nilai, dan perolehan SKS mahasiswa per semester.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            semester: {
-              type: "string",
-              description: "Nomor atau identifikasi semester (contoh: '1', '2', 'Ganjil', 'Genap')",
-            },
-          },
-        },
-      },
-    ],
+    tools: TOOLS,
   };
 });
 
